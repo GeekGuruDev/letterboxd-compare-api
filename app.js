@@ -18,5 +18,5 @@ app.get("/watchlist/:username", getWatchlist);
 app.get("/movie/:slug", getMovie);
 
 app.listen(PORT, () => {
-  console.log("Server running on port 3000...");
+  console.log(`Server running on port ${PORT}...`);
 });
