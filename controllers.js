@@ -32,6 +32,7 @@ const fetchMoviesFromPage = async (username, pageNo, type = "films") => {
 
     return moviesEachPage;
   } catch (error) {
+    console.log(error);
     throw error;
   }
 };
@@ -44,6 +45,7 @@ const fetchTotalPages = async (username, type = "films") => {
     const totalPages = parseInt($("li.paginate-page:last").text().trim());
     return totalPages || 1;
   } catch (error) {
+    console.log(error);
     throw error;
   }
 };
@@ -66,6 +68,7 @@ exports.getProfile = async (req, res) => {
     const profile = { username, displayName, avatar, moviesStat };
     res.status(200).json({ status: "success", data: profile });
   } catch (err) {
+    console.log(err);
     res.status(400).json({ status: "fail", message: err });
   }
 };
@@ -86,6 +89,7 @@ exports.getMovies = async (req, res) => {
       .status(200)
       .json({ status: "success", results: movies.length, data: movies });
   } catch (err) {
+    console.log(err);
     res.status(400).json({ status: "fail", message: err });
   }
 };
@@ -106,6 +110,7 @@ exports.getWatchlist = async (req, res) => {
       .status(200)
       .json({ status: "success", results: watchlist.length, data: watchlist });
   } catch (err) {
+    console.log(err);
     res.status(400).json({ status: "fail", message: err });
   }
 };
@@ -132,6 +137,7 @@ exports.getMovie = async (req, res) => {
     };
     res.status(200).json({ status: "success", data: movie });
   } catch (err) {
+    console.log(err);
     res.status(400).json({ status: "fail", message: err });
   }
 };
