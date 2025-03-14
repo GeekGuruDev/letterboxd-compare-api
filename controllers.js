@@ -32,7 +32,7 @@ const fetchMoviesFromPage = async (username, pageNo, type = "films") => {
 
     return moviesEachPage;
   } catch (error) {
-    console.log("ERROR: ", error.message);
+    console.log("ERROR: ", error);
     throw error;
   }
 };
@@ -45,7 +45,7 @@ const fetchTotalPages = async (username, type = "films") => {
     const totalPages = parseInt($("li.paginate-page:last").text().trim());
     return totalPages || 1;
   } catch (error) {
-    console.log("ERROR: ", error.message);
+    console.log("ERROR: ", error);
     throw error;
   }
 };
@@ -68,7 +68,7 @@ exports.getProfile = async (req, res) => {
     const profile = { username, displayName, avatar, moviesStat };
     res.status(200).json({ status: "success", data: profile });
   } catch (err) {
-    console.log("ERROR: ", err.message);
+    console.log("ERROR: ", err);
     res.status(400).json({ status: "fail", message: err });
   }
 };
@@ -77,19 +77,25 @@ exports.getMovies = async (req, res) => {
   try {
     const { username } = req.params;
     const totalPages = await fetchTotalPages(username);
-    const pagePromises = [];
 
-    for (let page = 1; page <= totalPages; page++) {
-      pagePromises.push(fetchMoviesFromPage(username, page));
+    let movies = [];
+
+    for (let page = 0; page < totalPages; page += 5) {
+      const pagePromises = [];
+      pagePromises.push(fetchMoviesFromPage(username, page + 1));
+      pagePromises.push(fetchMoviesFromPage(username, page + 2));
+      pagePromises.push(fetchMoviesFromPage(username, page + 3));
+      pagePromises.push(fetchMoviesFromPage(username, page + 4));
+      pagePromises.push(fetchMoviesFromPage(username, page + 5));
+      const fivePagesMovies = (await Promise.all(pagePromises)).flat();
+      movies = [...movies, ...fivePagesMovies];
     }
-
-    const movies = (await Promise.all(pagePromises)).flat();
 
     res
       .status(200)
       .json({ status: "success", results: movies.length, data: movies });
   } catch (err) {
-    console.log("ERROR: ", err.message);
+    console.log("ERROR: ", err);
     res.status(400).json({ status: "fail", message: err });
   }
 };
@@ -98,19 +104,25 @@ exports.getWatchlist = async (req, res) => {
   try {
     const { username } = req.params;
     const totalPages = await fetchTotalPages(username, "watchlist");
-    const pagePromises = [];
 
-    for (let page = 1; page <= totalPages; page++) {
-      pagePromises.push(fetchMoviesFromPage(username, page, "watchlist"));
+    let watchlist = [];
+
+    for (let page = 0; page < totalPages; page += 5) {
+      const pagePromises = [];
+      pagePromises.push(fetchMoviesFromPage(username, page + 1, "watchlist"));
+      pagePromises.push(fetchMoviesFromPage(username, page + 2, "watchlist"));
+      pagePromises.push(fetchMoviesFromPage(username, page + 3, "watchlist"));
+      pagePromises.push(fetchMoviesFromPage(username, page + 4, "watchlist"));
+      pagePromises.push(fetchMoviesFromPage(username, page + 5, "watchlist"));
+      const fivePagesMovies = (await Promise.all(pagePromises)).flat();
+      watchlist = [...watchlist, ...fivePagesMovies];
     }
-
-    const watchlist = (await Promise.all(pagePromises)).flat();
 
     res
       .status(200)
       .json({ status: "success", results: watchlist.length, data: watchlist });
   } catch (err) {
-    console.log("ERROR: ", err.message);
+    console.log("ERROR: ", err);
     res.status(400).json({ status: "fail", message: err });
   }
 };
@@ -137,7 +149,7 @@ exports.getMovie = async (req, res) => {
     };
     res.status(200).json({ status: "success", data: movie });
   } catch (err) {
-    console.log("ERROR: ", err.message);
+    console.log("ERROR: ", err);
     res.status(400).json({ status: "fail", message: err });
   }
 };
