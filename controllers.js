@@ -78,23 +78,12 @@ exports.getMovies = async (req, res) => {
     const { username } = req.params;
     const totalPages = await fetchTotalPages(username);
 
-    let movies = [];
-
-    for (let page = 0; page < totalPages; page += 10) {
-      const pagePromises = [];
-      pagePromises.push(fetchMoviesFromPage(username, page + 1));
-      pagePromises.push(fetchMoviesFromPage(username, page + 2));
-      pagePromises.push(fetchMoviesFromPage(username, page + 3));
-      pagePromises.push(fetchMoviesFromPage(username, page + 4));
-      pagePromises.push(fetchMoviesFromPage(username, page + 5));
-      pagePromises.push(fetchMoviesFromPage(username, page + 6));
-      pagePromises.push(fetchMoviesFromPage(username, page + 7));
-      pagePromises.push(fetchMoviesFromPage(username, page + 8));
-      pagePromises.push(fetchMoviesFromPage(username, page + 9));
-      pagePromises.push(fetchMoviesFromPage(username, page + 10));
-      const tenPagesMovies = (await Promise.all(pagePromises)).flat();
-      movies = [...movies, ...tenPagesMovies];
+    const pagePromises = [];
+    for (let page = 1; page <= totalPages; page++) {
+      pagePromises.push(fetchMoviesFromPage(username, page));
     }
+
+    const movies = (await Promise.all(pagePromises)).flat();
 
     res
       .status(200)
@@ -110,23 +99,12 @@ exports.getWatchlist = async (req, res) => {
     const { username } = req.params;
     const totalPages = await fetchTotalPages(username, "watchlist");
 
-    let watchlist = [];
-
-    for (let page = 0; page < totalPages; page += 5) {
-      const pagePromises = [];
-      pagePromises.push(fetchMoviesFromPage(username, page + 1, "watchlist"));
-      pagePromises.push(fetchMoviesFromPage(username, page + 2, "watchlist"));
-      pagePromises.push(fetchMoviesFromPage(username, page + 3, "watchlist"));
-      pagePromises.push(fetchMoviesFromPage(username, page + 4, "watchlist"));
-      pagePromises.push(fetchMoviesFromPage(username, page + 5, "watchlist"));
-      pagePromises.push(fetchMoviesFromPage(username, page + 6, "watchlist"));
-      pagePromises.push(fetchMoviesFromPage(username, page + 7, "watchlist"));
-      pagePromises.push(fetchMoviesFromPage(username, page + 8, "watchlist"));
-      pagePromises.push(fetchMoviesFromPage(username, page + 9, "watchlist"));
-      pagePromises.push(fetchMoviesFromPage(username, page + 10, "watchlist"));
-      const tenPagesMovies = (await Promise.all(pagePromises)).flat();
-      watchlist = [...watchlist, ...tenPagesMovies];
+    const pagePromises = [];
+    for (let page = 1; page <= totalPages; page++) {
+      pagePromises.push(fetchMoviesFromPage(username, page, "watchlist"));
     }
+
+    const watchlist = (await Promise.all(pagePromises)).flat();
 
     res
       .status(200)
