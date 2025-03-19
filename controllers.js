@@ -53,6 +53,7 @@ const fetchTotalPages = async (username, type = "films") => {
 exports.getProfile = async (req, res) => {
   try {
     const { username } = req.params;
+    console.log("Getting profile of ", username);
     const response = await fetch(`${baseUrl}${username}/`);
     const html = await response.text();
     const $ = cheerio.load(html);
