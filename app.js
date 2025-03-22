@@ -10,13 +10,16 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+setInterval(() => {
+  console.log("Server still running on port", PORT);
+}, 10 * 60 * 1000);
 
+app.use(cors());
 app.get("/profile/:username", getProfile);
 app.get("/movies/:username", getMovies);
 app.get("/watchlist/:username", getWatchlist);
 app.get("/movie/:slug", getMovie);
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}...`);
+  console.log("Server running on port", PORT);
 });
