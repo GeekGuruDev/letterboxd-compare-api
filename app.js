@@ -10,8 +10,10 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-setInterval(() => {
-  console.log("Server still running on port", PORT);
+setInterval(async () => {
+  const res = await fetch("https://jsonplaceholder.typicode.com/posts/1");
+  const status = await res.statusText;
+  console.log("Status", status);
 }, 10 * 60 * 1000);
 
 app.use(cors());
