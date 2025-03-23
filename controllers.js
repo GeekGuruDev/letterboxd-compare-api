@@ -142,3 +142,7 @@ exports.getMovie = async (req, res) => {
     res.status(400).json({ status: "fail", message: err });
   }
 };
+
+exports.getStatus = (req, res) => {
+  res.status(200).json({ status: "success", message: "API is running" });
+};
