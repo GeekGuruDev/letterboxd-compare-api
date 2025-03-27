@@ -45,11 +45,11 @@ const fetchReviewsFromPage = async (url, pageNo) => {
     const reviewsEachPage = [];
 
     $("li.viewing-poster-container").each(async (idx, element) => {
-      const movie_title = $(element)
+      const title = $(element)
         .find(".film-detail-content > h2 > a")
         .text()
         .trim();
-      const movie_slug = $(element).find("div").attr("data-film-slug").trim();
+      const slug = $(element).find("div").attr("data-film-slug").trim();
 
       const releaseYear = $(element)
         .find(".film-detail-content > h2 > small > a")
@@ -75,8 +75,8 @@ const fetchReviewsFromPage = async (url, pageNo) => {
       rateStars = rateStars.length > 0 ? rateStars : null;
 
       reviewsEachPage.push({
-        movie_title,
-        movie_slug,
+        title,
+        slug,
         watchedDate,
         liked,
         releaseYear,
