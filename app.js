@@ -6,6 +6,7 @@ const {
   getWatchlist,
   getMovie,
   getStatus,
+  getReviews,
 } = require("./controllers");
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(cors());
 app.get("/profile/:username", getProfile);
 app.get("/movies/:username", getMovies);
 app.get("/watchlist/:username", getWatchlist);
+app.get("/reviews/:username", getReviews);
 app.get("/movie/:slug", getMovie);
 app.get("/status", getStatus);
 

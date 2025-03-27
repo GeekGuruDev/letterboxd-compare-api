@@ -2,9 +2,9 @@ const cheerio = require("cheerio");
 
 const baseUrl = "https://letterboxd.com/";
 
-const fetchMoviesFromPage = async (username, pageNo, type = "films") => {
+const fetchMoviesFromPage = async (url, pageNo) => {
   try {
-    const res = await fetch(`${baseUrl}${username}/${type}/page/${pageNo}/`);
+    const res = await fetch(`${url}/page/${pageNo}/`);
     const html = await res.text();
     const $ = cheerio.load(html);
     const moviesEachPage = [];
@@ -37,9 +37,65 @@ const fetchMoviesFromPage = async (username, pageNo, type = "films") => {
   }
 };
 
-const fetchTotalPages = async (username, type = "films") => {
+const fetchReviewsFromPage = async (url, pageNo) => {
   try {
-    const res = await fetch(`${baseUrl}${username}/${type}/`);
+    const res = await fetch(`${url}/page/${pageNo}/`);
+    const html = await res.text();
+    const $ = cheerio.load(html);
+    const reviewsEachPage = [];
+
+    $("li.viewing-poster-container").each(async (idx, element) => {
+      const movie_title = $(element)
+        .find(".film-detail-content > h2 > a")
+        .text()
+        .trim();
+      const movie_slug = $(element).find("div").attr("data-film-slug").trim();
+
+      const releaseYear = $(element)
+        .find(".film-detail-content > h2 > small > a")
+        .text()
+        .trim();
+
+      const rate =
+        $(element)
+          .find(".rating")
+          .attr("class")
+          ?.split(" ")
+          .at(-1)
+          .split("-")[1] / 2;
+
+      const watchedDate = $(element).find("._nobr").text().trim();
+
+      const review = $(element).find(".js-review-body").text().trim();
+
+      const liked =
+        $(element).find(".attribution").children(".icon-liked").length > 0;
+
+      let rateStars = $(element).find(".rating").text().trim();
+      rateStars = rateStars.length > 0 ? rateStars : null;
+
+      reviewsEachPage.push({
+        movie_title,
+        movie_slug,
+        watchedDate,
+        liked,
+        releaseYear,
+        rate,
+        rateStars,
+        review,
+      });
+    });
+
+    return reviewsEachPage;
+  } catch (error) {
+    console.log("ERROR: ", error);
+    throw error;
+  }
+};
+
+const fetchTotalPages = async (url) => {
+  try {
+    const res = await fetch(url);
     const html = await res.text();
     const $ = cheerio.load(html);
     const totalPages = parseInt($("li.paginate-page:last").text().trim());
@@ -77,11 +133,12 @@ exports.getProfile = async (req, res) => {
 exports.getMovies = async (req, res) => {
   try {
     const { username } = req.params;
-    const totalPages = await fetchTotalPages(username);
+    const url = `${baseUrl}${username}/films/`;
+    const totalPages = await fetchTotalPages(url);
 
     const pagePromises = [];
     for (let page = 1; page <= totalPages; page++) {
-      pagePromises.push(fetchMoviesFromPage(username, page));
+      pagePromises.push(fetchMoviesFromPage(url, page));
     }
 
     const movies = (await Promise.all(pagePromises)).flat();
@@ -98,11 +155,12 @@ exports.getMovies = async (req, res) => {
 exports.getWatchlist = async (req, res) => {
   try {
     const { username } = req.params;
-    const totalPages = await fetchTotalPages(username, "watchlist");
+    const url = `${baseUrl}${username}/watchlist/`;
+    const totalPages = await fetchTotalPages(url);
 
     const pagePromises = [];
     for (let page = 1; page <= totalPages; page++) {
-      pagePromises.push(fetchMoviesFromPage(username, page, "watchlist"));
+      pagePromises.push(fetchMoviesFromPage(url, page));
     }
 
     const watchlist = (await Promise.all(pagePromises)).flat();
@@ -110,6 +168,26 @@ exports.getWatchlist = async (req, res) => {
     res
       .status(200)
       .json({ status: "success", results: watchlist.length, data: watchlist });
+  } catch (err) {
+    console.log("ERROR: ", err);
+    res.status(400).json({ status: "fail", message: err });
+  }
+};
+
+exports.getReviews = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const url = `${baseUrl}${username}/films/reviews/`;
+    const totalPages = await fetchTotalPages(url);
+    const pagePromises = [];
+    for (let page = 1; page <= totalPages; page++) {
+      pagePromises.push(fetchReviewsFromPage(url, page));
+    }
+    const reviews = (await Promise.all(pagePromises)).flat();
+
+    res
+      .status(200)
+      .json({ status: "success", results: reviews.length, data: reviews });
   } catch (err) {
     console.log("ERROR: ", err);
     res.status(400).json({ status: "fail", message: err });
